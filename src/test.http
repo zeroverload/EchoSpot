@@ -1,0 +1,7 @@
+### 1. 测试无缓存时的商户查询（先清空Redis）
+GET http://localhost:8081/shop/1
+Accept: application/json
+
+### 2. 测试有缓存时的商户查询（触发缓存预热后）
+GET http://localhost:8081/shop/1
+Accept: application/json
