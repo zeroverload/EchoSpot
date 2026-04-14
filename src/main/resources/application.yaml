@@ -7,7 +7,7 @@
       username: guest
       password: guest
     application:
-      name: hmdp
+      name: EchoSpot
     datasource:
       driver-class-name: com.mysql.jdbc.Driver
       url: jdbc:mysql://127.0.0.1:3306/hmdp?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
@@ -26,7 +26,7 @@
     jackson:
       default-property-inclusion: non_null # JSON处理时忽略非空字段
   mybatis-plus:
-    type-aliases-package: com.hmdp.entity # 别名扫描包
+    type-aliases-package: com.zeroverload.entity # 别名扫描包
   logging:
     level:
-      com.hmdp: debug
+      com.zeroverload: debug

@@ -10,10 +10,10 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @MapperScan("com.zeroverload.mapper")
 @EnableRabbit
 @SpringBootApplication
-public class HmDianPingApplication {
+public class EchoSpotApplication {
     //
     public static void main(String[] args) {
-        SpringApplication.run(HmDianPingApplication.class, args);
+        SpringApplication.run(EchoSpotApplication.class, args);
     }
 
 }

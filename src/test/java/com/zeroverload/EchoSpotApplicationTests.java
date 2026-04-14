@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 import static com.zeroverload.utils.RedisConstants.SHOP_GEO_KEY;
 
 @SpringBootTest
-class HmDianPingApplicationTests {
+class EchoSpotApplicationTests {
     @Resource
     private ShopServiceImpl shopService;
 
