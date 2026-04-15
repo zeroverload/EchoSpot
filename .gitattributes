@@ -1,0 +1,13 @@
+# 1. 把 JS 文件从语言统计里排除（推荐）
+*.js linguist-detectable=false
+node_modules/** linguist-vendored
+dist/** linguist-vendored
+build/** linguist-vendored
+target/** linguist-vendored
+
+# 2. 确保 Java 被统计（如果被误忽略）
+*.java linguist-detectable=true
+src/** linguist-vendored=false
+
+# 3.（可选）直接强行指定整个项目为 Java
+* linguist-language=Java
