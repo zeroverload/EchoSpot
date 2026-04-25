@@ -4,6 +4,7 @@ import com.zeroverload.interceptor.LoginInterceptor;
 import com.zeroverload.interceptor.RefreshTokenInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -13,6 +14,16 @@ import javax.annotation.Resource;
 public class MvcConfig implements WebMvcConfigurer {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOriginPatterns("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .maxAge(3600);
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         //注册LoginInterceptor（登录校验拦截器）
@@ -22,6 +33,7 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/upload/**",
                         "/voucher/**",
                         "/user/code",
+                        "/station/**",
                         "/shop/**",
                         "/shop-type/**",
                         "/blog/hot"

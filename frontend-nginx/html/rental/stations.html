@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>站点 - 城市共享设备智能调度平台</title>
+  <link rel="stylesheet" href="assets/app.css"/>
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <div>站点与设备</div>
+        <div class="muted" style="font-size:12px;">选择站点进入设备租借页</div>
+      </div>
+    </div>
+    <div class="nav">
+      <a class="pill" href="index.html">概览</a>
+      <a class="pill primary" href="stations.html">站点</a>
+      <a class="pill" href="me.html">我的</a>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>搜索站点</h2>
+      <div class="row">
+        <input id="kw" placeholder="站点名称关键字（来自 tb_shop.name）" style="flex:1;min-width:240px"/>
+        <button class="btn" id="searchBtn">搜索</button>
+      </div>
+      <div class="list" id="list"></div>
+      <div class="muted" style="margin-top:10px;font-size:12px;">
+        站点数据来自 `/shop/of/name`。设备数据来自 `/station/{stationId}/devices`。
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">提示：把 `tb_device.station_id` 设置为站点（shop）ID 才能展示设备。</div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="assets/app.js"></script>
+<script>
+  const { api, toast, qs } = window.RentalApp;
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  async function search() {
+    const kw = document.getElementById('kw').value || '';
+    const list = document.getElementById('list');
+    list.innerHTML = '';
+    try {
+      const stations = await api('/shop/of/name', { query: { name: kw, current: 1 }, auth: false });
+      (stations || []).forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `
+          <div style="min-width:0;">
+            <div class="title">${escapeHtml(s.name || ('站点#' + s.id))}</div>
+            <div class="sub">${escapeHtml(s.address || '')}</div>
+          </div>
+          <div class="row" style="gap:8px;flex-shrink:0;">
+            <span class="badge">ID ${s.id}</span>
+            <a class="btn primary" href="station.html?id=${s.id}">进入</a>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+      if (!stations || stations.length === 0) {
+        const div = document.createElement('div');
+        div.className = 'muted';
+        div.style.marginTop = '10px';
+        div.textContent = '暂无匹配站点';
+        list.appendChild(div);
+      }
+    } catch (e) {
+      toast(e.message || String(e));
+    }
+  }
+
+  document.getElementById('searchBtn').addEventListener('click', search);
+  document.getElementById('kw').addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+  document.getElementById('kw').value = qs('q') || '';
+  search();
+</script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+:root{
+  --bg:#0b1220;
+  --panel:#121a2b;
+  --panel2:#0f172a;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --brand:#22c55e;
+  --brand2:#0ea5e9;
+  --danger:#ef4444;
+  --warning:#f59e0b;
+  --border:rgba(255,255,255,.08);
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  background: radial-gradient(1200px 600px at 15% 10%, rgba(14,165,233,.25), transparent 55%),
+              radial-gradient(900px 500px at 85% 15%, rgba(34,197,94,.18), transparent 60%),
+              var(--bg);
+  color:var(--text);
+}
+a{color:inherit;text-decoration:none}
+.container{max-width:1100px;margin:0 auto;padding:18px}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:14px 18px;border:1px solid var(--border);
+  background: rgba(18,26,43,.65);backdrop-filter: blur(10px);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  position:sticky;top:12px;z-index:10;
+}
+.brand{
+  display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.3px
+}
+.logo{
+  width:34px;height:34px;border-radius:10px;
+  background: linear-gradient(135deg,var(--brand2),var(--brand));
+  box-shadow: 0 10px 22px rgba(34,197,94,.18);
+}
+.nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pill{
+  padding:10px 12px;border-radius:999px;border:1px solid var(--border);
+  background: rgba(15,23,42,.7);
+  color:var(--text);font-size:14px;cursor:pointer;
+}
+.pill:hover{border-color: rgba(34,197,94,.35)}
+.pill.primary{
+  background: linear-gradient(135deg, rgba(14,165,233,.35), rgba(34,197,94,.25));
+  border-color: rgba(34,197,94,.35);
+}
+.grid{
+  margin-top:16px;
+  display:grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap:14px;
+}
+.card{
+  grid-column: span 12;
+  border:1px solid var(--border);
+  background: rgba(18,26,43,.55);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding:14px;
+}
+.card h2{margin:0 0 8px 0;font-size:16px}
+.muted{color:var(--muted)}
+.kpi{
+  display:flex;gap:12px;flex-wrap:wrap
+}
+.kpi .box{
+  flex:1;min-width:200px;
+  padding:12px;border-radius:12px;border:1px solid var(--border);
+  background: rgba(15,23,42,.6);
+}
+.kpi .value{font-size:22px;font-weight:800;margin-top:6px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input,select{
+  outline:none;border:1px solid var(--border);border-radius:12px;
+  padding:12px 12px;background: rgba(15,23,42,.7);color:var(--text);
+}
+input::placeholder{color:rgba(156,163,175,.7)}
+.btn{
+  padding:12px 14px;border-radius:12px;border:1px solid var(--border);
+  background: rgba(15,23,42,.7);color:var(--text);cursor:pointer;
+}
+.btn:hover{border-color: rgba(14,165,233,.4)}
+.btn.primary{
+  background: linear-gradient(135deg, rgba(14,165,233,.7), rgba(34,197,94,.6));
+  border-color: rgba(34,197,94,.35);
+}
+.btn.danger{
+  background: rgba(239,68,68,.18);
+  border-color: rgba(239,68,68,.35);
+}
+.list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.item{
+  border:1px solid var(--border);
+  background: rgba(15,23,42,.55);
+  border-radius: 14px;
+  padding:12px;
+  display:flex;justify-content:space-between;gap:10px;align-items:center;
+}
+.item .title{font-weight:800}
+.item .sub{color:var(--muted);font-size:13px;margin-top:3px}
+.badge{
+  font-size:12px;padding:6px 10px;border-radius:999px;
+  border:1px solid var(--border);background: rgba(2,6,23,.35);
+}
+.badge.ok{border-color: rgba(34,197,94,.4); color:#bbf7d0}
+.badge.warn{border-color: rgba(245,158,11,.4); color:#fde68a}
+.badge.bad{border-color: rgba(239,68,68,.4); color:#fecaca}
+.toast{
+  position: fixed; right:16px; bottom:16px;
+  padding:12px 14px;border-radius:12px;border:1px solid var(--border);
+  background: rgba(2,6,23,.75); color:var(--text);
+  max-width: 320px; box-shadow: var(--shadow); display:none;
+}
+.footer{
+  margin:22px 0 8px 0;
+  text-align:center;color:rgba(156,163,175,.7);font-size:12px
+}
+@media (min-width: 900px){
+  .card.span6{grid-column: span 6}
+  .card.span4{grid-column: span 4}
+}
+

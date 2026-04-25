@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>EchoSpot - 发现精彩生活</title>
+  <title>城市共享设备智能调度平台</title>
   <!-- 引入样式 -->
   <link rel="stylesheet" href="./css/element.css">
   <link href="./css/index.css" rel="stylesheet">
@@ -61,13 +61,29 @@
 <body>
 <div id="app">
   <div class="search-bar">
-    <div class="city-btn">杭州 <i class="el-icon-arrow-down"></i></div>
+    <div class="city-btn">城市 <i class="el-icon-arrow-down"></i></div>
     <div class="search-input">
-      <el-input size="mini" placeholder="发现精彩好去处">
+      <el-input size="mini" placeholder="搜索站点 / 设备 / 地址">
         <i slot="prefix" class="el-input__icon el-icon-search"></i>
       </el-input>
     </div>
     <div class="header-icon" @click="toPage(4)"><i class="el-icon-user"></i></div>
+  </div>
+  <div style="padding: 10px 10px 0 10px;">
+    <div style="background: linear-gradient(135deg,#0ea5e9,#22c55e); border-radius: 14px; padding: 14px; color: #fff;">
+      <div style="font-size: 16px; font-weight: 700;">城市共享设备智能调度平台</div>
+      <div style="margin-top: 6px; font-size: 12px; opacity: .92;">高并发租借 / 归还 · Redis+Lua 原子校验 · MQ 异步落库</div>
+      <div style="margin-top: 10px; display:flex; gap:8px;">
+        <div @click="toStationList()" style="flex:1; background: rgba(255,255,255,.18); border-radius: 10px; padding: 10px; text-align:center; cursor:pointer;">
+          <div style="font-size: 13px; font-weight: 600;">站点列表</div>
+          <div style="font-size: 11px; opacity:.9;">查看设备库存</div>
+        </div>
+        <div @click="toMyRental()" style="flex:1; background: rgba(255,255,255,.18); border-radius: 10px; padding: 10px; text-align:center; cursor:pointer;">
+          <div style="font-size: 13px; font-weight: 600;">我的租借</div>
+          <div style="font-size: 11px; opacity:.9;">一人一租</div>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="type-list">
     <div class="type-box" v-for="t in types" :key="t.id" @click="toShopList(t.id, t.name)">
@@ -78,7 +94,7 @@
   <div class="blog-list" @scroll="onScroll">
     <div v-if="blogs.length === 0" class="empty-state">
       <i class="fas fa-compass"></i>
-      <div>正在为您加载精彩内容...</div>
+      <div>正在加载平台动态...</div>
     </div>
     <div v-else class="blog-box fade-in" v-for="(b, index) in blogs" :key="b.id" @click="toBlogDetail(b)" :style="{animationDelay: index * 0.1 + 's'}">
       <div class="blog-img"><img :src="b.img" alt=""></div>
@@ -125,6 +141,24 @@
       this.queryHotBlogsScroll();
     },
     methods: {
+      toStationList() {
+        location.href = "/shop-list.html?type=1&name=站点";
+      },
+      toMyRental() {
+        if(!token){
+          this.$message.error("请先登录")
+          setTimeout(() => {
+            location.href = "/login.html"
+          }, 200);
+          return;
+        }
+        location.href = "/shop-detail.html?id=1";
+      },
+      toPage(i) {
+        if (i === 4) {
+          location.href = "/info.html"
+        }
+      },
       queryTypes() {
         axios.get("/shop-type/list")
           .then(({data}) => {

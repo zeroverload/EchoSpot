@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>黑马点评</title>
+  <title>城市共享设备智能调度平台</title>
   <!-- 引入样式 -->
   <link rel="stylesheet" href="./css/element.css">
 
@@ -18,7 +18,7 @@
 <div id="app">
   <div class="header">
     <div class="header-back-btn" @click="goBack"><i class="el-icon-arrow-left"></i></div>
-    <div class="header-title">{{typeName}}</div>
+    <div class="header-title">站点列表</div>
     <div class="header-search">
       <i class="el-icon-search"></i>
     </div>
@@ -27,7 +27,7 @@
     <div class="sort-item">
       <el-dropdown trigger="click" @command="handleCommand">
       <span class="el-dropdown-link">
-        {{typeName}}<i class="el-icon-arrow-down el-icon--right"></i>
+        {{typeName || '站点'}}<i class="el-icon-arrow-down el-icon--right"></i>
       </span>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item v-for="t in types" :key="t.id" :command="t">
@@ -50,7 +50,7 @@
     <div class="shop-box" v-for="s in shops" :key="s.id" @click="toDetail(s.id)">
       <div class="shop-img"><img :src="s.images" alt=""></div>
       <div class="shop-info">
-        <div class="shop-title shop-item">{{s.name}}</div>
+        <div class="shop-title shop-item">{{s.name}} <span style="font-size:12px;color:#999;">(站点)</span></div>
         <div class="shop-rate shop-item" >
           <el-rate
               disabled v-model="s.score/10"
@@ -63,7 +63,7 @@
           <span>{{s.area}}</span>
           <span v-if="s.distance">{{s.distance < 1000 ? s.distance.toFixed(1) + 'm' : (s.distance/1000).toFixed(1) + 'km'}}</span>
         </div>
-        <div class="shop-avg shop-item">￥{{s.avgPrice}}/人</div>
+        <div class="shop-avg shop-item">共享设备站点</div>
         <div class="shop-address shop-item">
           <i class="el-icon-map-location"></i>
           <span>{{s.address}}</span>

@@ -1,11 +1,13 @@
 package com.zeroverload.config;
 import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.HashMap;
 @Configuration
+@ConditionalOnProperty(name = "rental.mq.enabled", havingValue = "true", matchIfMissing = true)
 public class QueueConfig {
 
     //普通交换机名称

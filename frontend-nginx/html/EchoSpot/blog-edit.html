@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>黑马点评</title>
+  <title>城市共享设备智能调度平台 - 发布</title>
   <!-- 引入样式 -->
   <link rel="stylesheet" href="./css/element.css">
   <link href="./css/main.css" rel="stylesheet">
@@ -43,7 +43,7 @@
   </div>
   <div class="divider"></div>
   <div class="blog-shop" @click="showDialog=true">
-    <div class="shop-left">关联商户</div>
+    <div class="shop-left">关联站点</div>
     <div v-if="selectedShop.name">{{selectedShop.name}}</div>
     <div v-else>去选择&nbsp;<i class="el-icon-arrow-right"></i></div>
   </div>
@@ -52,13 +52,13 @@
   <transition name="el-zoom-in-bottom">
     <div class="shop-dialog" v-show="showDialog">
       <div class="blog-shop">
-        <div class="shop-left">关联商户</div>
+        <div class="shop-left">关联站点</div>
       </div>
       <div class="search-bar">
         <div class="city-select">杭州 <i class="el-icon-arrow-down"></i></div>
         <div class="search-input">
           <i class="el-icon-search" @click="queryShops"></i>
-          <input v-model="shopName" type="text" placeholder="搜索商户名称">
+          <input v-model="shopName" type="text" placeholder="搜索站点名称">
         </div>
       </div>
       <div class="shop-list">

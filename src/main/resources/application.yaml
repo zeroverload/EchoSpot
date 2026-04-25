@@ -1,32 +1,57 @@
-  server:
-    port: 8081
-  spring:
-    rabbitmq:
-      host: localhost
-      port: 5672
-      username: guest
-      password: guest
-    application:
-      name: EchoSpot
-    datasource:
-      driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://127.0.0.1:3306/hmdp?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      username: root
-      password: 123456
-    redis:
-      host: 127.0.0.1
-      port: 6379
+server:
+  port: 8081
 
-      lettuce:
-        pool:
-          max-active: 30
-          max-idle: 15
-          min-idle: 5
-          time-between-eviction-runs: 10s
-    jackson:
-      default-property-inclusion: non_null # JSON处理时忽略非空字段
-  mybatis-plus:
-    type-aliases-package: com.zeroverload.entity # 别名扫描包
-  logging:
-    level:
-      com.zeroverload: debug
+spring:
+  application:
+    name: EchoSpot
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/hmdp?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    lettuce:
+      pool:
+        max-active: 30
+        max-idle: 15
+        min-idle: 5
+        time-between-eviction-runs: 10s
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        auto-startup: ${rental.mq.enabled:true}
+  jackson:
+    default-property-inclusion: non_null # JSON处理时忽略非空字段
+
+mybatis-plus:
+  type-aliases-package: com.zeroverload.entity # 别名扫描包
+
+logging:
+  level:
+    com.zeroverload: debug
+
+auth:
+  sms:
+    mock: true
+
+rental:
+  mq:
+    enabled: false
+    fallback-sync: true
+  debug-mappings: false
+
+# 多级缓存：Caffeine(L1) + Redis(L2)
+cache:
+  l1:
+    enabled: true
+    maximum-size: 10000
+    expire-seconds: 60
+  redis:
+    # 随机 TTL 抖动，避免大量 key 同时过期导致雪崩（单位：秒）
+    ttl-jitter-seconds: 300

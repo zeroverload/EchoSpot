@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# 忽略个人笔记文件
+ECHOSPOT_STUDY_NOTES.md

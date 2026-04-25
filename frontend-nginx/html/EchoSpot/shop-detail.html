@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>黑马点评</title>
+  <title>城市共享设备智能调度平台</title>
   <!-- 引入样式 -->
   <link rel="stylesheet" href="./css/element.css">
 
@@ -61,27 +61,45 @@
   <div class="shop-divider"></div>
   <div class="shop-voucher">
     <div>
-      <span class="voucher-icon">券</span>
-      <span style="font-weight: bold;">代金券</span>
+      <span class="voucher-icon">租</span>
+      <span style="font-weight: bold;">共享设备租赁</span>
     </div>
-    <div class="voucher-box" v-for="v in vouchers" :key="v.id" v-if="!isEnd(v)">
+
+    <div class="voucher-box" v-for="a in activeRentals" :key="a.orderId">
       <div class="voucher-circle">
         <div class="voucher-b"></div>
         <div class="voucher-b"></div>
         <div class="voucher-b"></div>
       </div>
       <div class="voucher-left">
-        <div class="voucher-title">{{v.title}}</div>
-        <div class="voucher-subtitle">{{v.subTitle}}</div>
-        <div class="voucher-price"><div>￥ {{util.formatPrice(v.payValue)}}</div>  <span>{{(v.payValue*10)/v.actualValue}}折</span></div>
+        <div class="voucher-title">当前租借中</div>
+        <div class="voucher-subtitle">订单号：{{a.orderId}}</div>
+        <div class="voucher-price">
+          <div>设备：{{a.deviceName || a.deviceId}}</div>
+          <span>可归还</span>
+        </div>
       </div>
       <div class="voucher-right">
-        <div v-if="v.type" class="seckill-box">
-          <div class="voucher-btn" :class="{'disable-btn': isNotBegin(v) || v.stock < 1}" @click="seckill(v)">限时抢购</div>
-          <div class="seckill-stock">剩余 <span>{{v.stock}}</span> 张</div>
-          <div class="seckill-time">{{formatTime(v)}}</div>
-        </div>
-        <div class="voucher-btn" v-else>抢购</div>
+        <div class="voucher-btn" @click="returnRental(a.orderId)">归还</div>
+      </div>
+    </div>
+
+    <div class="voucher-box" v-for="d in devices" :key="d.id">
+      <div class="voucher-circle">
+        <div class="voucher-b"></div>
+        <div class="voucher-b"></div>
+        <div class="voucher-b"></div>
+      </div>
+      <div class="voucher-left">
+        <div class="voucher-title">{{d.name}}</div>
+        <div class="voucher-subtitle">{{d.model || ''}}</div>
+        <div class="voucher-price"><div>库存 {{d.stock || 0}}</div> <span v-if="d.stock > 0">可租</span><span v-else>无货</span></div>
+      </div>
+      <div class="voucher-right">
+        <div class="voucher-btn"
+             :class="{'disable-btn': (d.stock || 0) < 1 || hasSameTypeActive(d.name)}"
+             @click="rentDevice(d)">租借</div>
+        <div class="seckill-stock" v-if="hasSameTypeActive(d.name)">你有同类未归还租借</div>
       </div>
     </div>
   </div>
@@ -150,15 +168,18 @@
     data: {
       util,
       shop: {},
-      vouchers: []
+      devices: [],
+      activeRentals: []
     },
     created() {
       // 获取参数
       let shopId = util.getUrlParam("id");
       // 查询酒店信息
       this.queryShopById(shopId);
-      // 查询优惠券信息
-      this.queryVoucher(shopId);
+      // 查询站点设备列表（沿用 shopId 作为 stationId）
+      this.queryDevices(shopId);
+      // 查询用户当前租借（需要登录；未登录会被拦截器 401 跳转）
+      this.queryActiveRentals();
     },
     methods: {
       goBack() {
@@ -172,61 +193,82 @@
         })
         .catch(this.$message.error)
       },
-      queryVoucher(shopId) {
-        axios.get("/voucher/list/" + shopId)
-        .then(({data}) => {
-          this.vouchers = data;
-        })
-        .catch(this.$message.error)
+      queryDevices(stationId) {
+        axios.get("/station/" + stationId + "/devices")
+          .then(({data}) => {
+            this.devices = data || [];
+          })
+          .catch(this.$message.error)
       },
-      formatTime(v){
-        let b = new Date(v.beginTime);
-        let e = new Date(v.endTime);
-        return b.getMonth() + 1 + "月" + b.getDate() + "日 "
-          +  b.getHours() + ":" + this.formatMinutes(b.getMinutes())
-          + " ~ "/*  + e.getMonth() + 1 + "月" + e.getDate() + "日 " */
-          +  e.getHours() + ":" + this.formatMinutes(e.getMinutes());
+      queryActiveRental() {
+        // deprecated: kept for compatibility with old code
+        return this.queryActiveRentals();
       },
-      formatMinutes(m){
-        if(m < 10) m = "0" + m
-        return m;
+      queryActiveRentals() {
+        if(!token){
+          this.activeRentals = [];
+          return;
+        }
+        axios.get("/rental/actives")
+          .then(({data}) => {
+            this.activeRentals = (data || []).filter(x => x && x.orderId);
+            (this.activeRentals || []).forEach(a => {
+              if(a && a.deviceId && (!a.deviceName)){
+                const d = (this.devices || []).find(x => x.id === a.deviceId);
+                if(d) a.deviceName = d.name;
+              }
+            })
+          })
+          .catch(() => {
+            this.activeRentals = [];
+          })
       },
-      isNotBegin(v){
-        return new Date(v.beginTime).getTime() > new Date().getTime();
+      hasSameTypeActive(deviceName){
+        if(!deviceName) return false;
+        return (this.activeRentals || []).some(a => a && a.orderId && a.deviceName === deviceName);
       },
-      isEnd(v){
-        return new Date(v.endTime).getTime() < new Date().getTime();
-      },
-      seckill(v){
+      rentDevice(d){
         if(!token){
           this.$message.error("请先登录")
-          // 未登录，跳转
           setTimeout(() => {
             location.href = "/login.html"
           }, 200);
           return;
         }
-        if(this.isNotBegin(v)){
-          this.$message.error("优惠券抢购尚未开始！")
+        if(this.hasSameTypeActive(d.name)){
+          this.$message.error("你有同类未归还租借，请先归还")
           return;
         }
-        if(this.isEnd(v)){
-          this.$message.error("优惠券抢购已经结束！")
-          return;
-        }
-        if(v.stock < 1){
+        if((d.stock || 0) < 1){
           this.$message.error("库存不足，请刷新再试试！")
           return;
         }
-        let id = v.id;
-        // 秒杀抢购
-        axios.post("/voucher-order/seckill/" + id)
-        .then(({data}) => {
-          // 抢购成功，这里输出订单id，支付功能TODO
-          this.$message.success("抢购成功，订单id：" + data)
-        })
-        .catch(this.$message.error)
-      }
+        let stationId = util.getUrlParam("id");
+        axios.post("/rental/rent/" + stationId + "/" + d.id)
+          .then(({data}) => {
+            this.$message.success("租借成功，订单id：" + data)
+            this.queryActiveRentals();
+            this.queryDevices(stationId);
+          })
+          .catch(this.$message.error)
+      },
+      returnRental(orderId){
+        if(!token){
+          this.$message.error("请先登录")
+          setTimeout(() => {
+            location.href = "/login.html"
+          }, 200);
+          return;
+        }
+        axios.post("/rental/return/" + orderId)
+          .then(() => {
+            this.$message.success("归还请求已提交")
+            let stationId = util.getUrlParam("id");
+            this.queryActiveRentals();
+            this.queryDevices(stationId);
+          })
+          .catch(this.$message.error)
+      },
     }
   })
 </script>

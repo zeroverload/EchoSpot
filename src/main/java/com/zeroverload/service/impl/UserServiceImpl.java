@@ -13,6 +13,7 @@ import com.zeroverload.mapper.UserMapper;
 import com.zeroverload.service.IUserService;
 import com.zeroverload.utils.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.BitFieldSubCommands;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    /**
+     * 开发环境短信验证码模拟开关：开启后接口会把验证码直接返回给前端（便于本地联调）。
+     */
+    @Value("${auth.sms.mock:true}")
+    private boolean smsMockEnabled;
     /**
      * 发送验证码
      * @param phone
@@ -62,8 +69,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
        stringRedisTemplate.opsForValue().set(RedisConstants.LOGIN_CODE_KEY +phone,code,2, TimeUnit.MINUTES);
         //5.发送验证码
         log.info("短信验证码发送成功：{}",code);
-
-        return Result.ok();
+        return smsMockEnabled ? Result.ok(code) : Result.ok();
 
     }
 

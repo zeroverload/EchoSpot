@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>登录 - 城市共享设备智能调度平台</title>
+  <link rel="stylesheet" href="assets/app.css"/>
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <div>登录</div>
+        <div class="muted" style="font-size:12px;">短信验证码（开发环境：验证码会打印在后端日志）</div>
+      </div>
+    </div>
+    <div class="nav">
+      <a class="pill" href="index.html">概览</a>
+      <a class="pill" href="stations.html">站点</a>
+      <a class="pill" href="me.html">我的</a>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card span6">
+      <h2>手机号验证码登录</h2>
+      <div class="row" style="margin-top:10px;">
+        <input id="phone" placeholder="手机号（例如 13800138000）" style="flex:1;min-width:240px"/>
+        <button class="btn" id="sendBtn">发送验证码</button>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <input id="code" placeholder="验证码（6位）" style="flex:1;min-width:240px"/>
+        <label class="muted" style="display:flex;gap:8px;align-items:center;font-size:13px;">
+          <input type="checkbox" id="remember" style="width:16px;height:16px;"/>
+          记住我
+        </label>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn primary" id="loginBtn">登录</button>
+        <button class="btn danger" id="clearBtn">清除登录</button>
+      </div>
+      <div class="muted" style="font-size:12px;margin-top:10px;">
+        后端接口：`POST /user/code?phone=...`、`POST /user/login`（返回 token，存入 `authorization` 头）。
+      </div>
+    </div>
+
+    <div class="card span6">
+      <h2>常见问题</h2>
+      <div class="list">
+        <div class="item">
+          <div>
+            <div class="title">收不到验证码？</div>
+            <div class="sub">开发环境不会真正发短信，验证码会打印在后端日志里。</div>
+          </div>
+          <span class="badge">Dev</span>
+        </div>
+        <div class="item">
+          <div>
+            <div class="title">提示未登录？</div>
+            <div class="sub">确保 Nginx 通过 `/api` 代理到后端（8081），并已保存 token。</div>
+          </div>
+          <span class="badge">Auth</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">登录成功后可在站点页进行租借/归还操作。</div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="assets/app.js"></script>
+<script>
+  const { Storage, api, toast, qs } = window.RentalApp;
+
+  const next = qs('next') || '/';
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    Storage.clearToken();
+    toast('已清除登录态');
+  });
+
+  document.getElementById('sendBtn').addEventListener('click', async () => {
+    const phone = document.getElementById('phone').value.trim();
+    if (!phone) return toast('请输入手机号');
+    try {
+      const serverCode = await api('/user/code', { method: 'POST', query: { phone }, auth: false });
+      if (serverCode) {
+        document.getElementById('code').value = String(serverCode);
+        toast('验证码已发送（已自动填入）');
+      } else {
+        toast('验证码已发送（开发环境请查看后端日志）');
+      }
+    } catch (e) {
+      toast(e.message || String(e));
+    }
+  });
+
+  document.getElementById('loginBtn').addEventListener('click', async () => {
+    const phone = document.getElementById('phone').value.trim();
+    const code = document.getElementById('code').value.trim();
+    const remember = document.getElementById('remember').checked;
+    if (!phone) return toast('请输入手机号');
+    if (!code) return toast('请输入验证码');
+    try {
+      const token = await api('/user/login', { method: 'POST', body: { phone, code }, auth: false });
+      Storage.setToken(token, remember);
+      toast('登录成功');
+      setTimeout(() => window.location.href = next, 300);
+    } catch (e) {
+      toast(e.message || String(e));
+    }
+  });
+
+  // auto-fill for convenience
+  if (Storage.getToken()) {
+    toast('当前已登录，如需切换账号请先清除登录态');
+  }
+</script>
+</body>
+</html>

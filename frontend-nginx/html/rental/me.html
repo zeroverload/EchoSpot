@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>我的 - 城市共享设备智能调度平台</title>
+  <link rel="stylesheet" href="assets/app.css"/>
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <div>我的</div>
+        <div class="muted" style="font-size:12px;">账户信息与当前租借</div>
+      </div>
+    </div>
+    <div class="nav">
+      <a class="pill" href="index.html">概览</a>
+      <a class="pill" href="stations.html">站点</a>
+      <a class="pill primary" href="me.html">我的</a>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card span6">
+      <h2>账户</h2>
+      <div id="meBox" class="muted">未登录</div>
+      <div class="row" style="margin-top:10px;">
+        <a class="btn primary" href="login.html" id="toLogin">去登录</a>
+        <button class="btn danger" id="logoutBtn">退出登录</button>
+      </div>
+    </div>
+
+    <div class="card span6">
+      <h2>当前租借</h2>
+      <div id="activeBox" class="muted">—</div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" id="refreshBtn">刷新</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">提示：若有租借中的订单，可在对应站点详情页归还。</div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="assets/app.js"></script>
+<script>
+  const { Storage, api, toast } = window.RentalApp;
+
+  async function refresh() {
+    const token = Storage.getToken();
+    document.getElementById('toLogin').style.display = token ? 'none' : 'inline-block';
+    document.getElementById('logoutBtn').style.display = token ? 'inline-block' : 'none';
+    const meBox = document.getElementById('meBox');
+    const activeBox = document.getElementById('activeBox');
+
+    if (!token) {
+      meBox.textContent = '未登录';
+      activeBox.textContent = '请先登录';
+      return;
+    }
+
+    try {
+      const me = await api('/user/me');
+      meBox.innerHTML = `
+        <div class="item">
+          <div>
+            <div class="title">${(me.nickName || ('用户#' + me.id))}</div>
+            <div class="sub">ID：${me.id}</div>
+          </div>
+          <span class="badge ok">已登录</span>
+        </div>
+      `;
+    } catch (e) {
+      Storage.clearToken();
+      meBox.textContent = '登录已失效，请重新登录';
+      activeBox.textContent = '—';
+      return;
+    }
+
+    try {
+      const actives = await api('/rental/actives');
+      const list = Array.isArray(actives) ? actives.filter(x => x && x.orderId) : [];
+      if (list.length === 0) {
+        activeBox.textContent = '无租借中的订单';
+      } else {
+        activeBox.innerHTML = `
+          <div class="list" style="margin-top:0;">
+            ${list.map(a => {
+              const stationId = a.stationId || '';
+              return `
+                <div class="item">
+                  <div>
+                    <div class="title">订单号 ${a.orderId}</div>
+                    <div class="sub">站点：${stationId || '—'}，设备：${a.deviceName || a.deviceId || '—'}</div>
+                  </div>
+                  <a class="btn primary" href="station.html?id=${stationId}">去归还</a>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+    } catch (e) {
+      activeBox.textContent = '查询失败：' + (e.message || String(e));
+    }
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    try {
+      await api('/user/logout', { method: 'POST' });
+    } catch (e) {
+      // ignore
+    } finally {
+      Storage.clearToken();
+      toast('已退出');
+      refresh();
+    }
+  });
+  document.getElementById('refreshBtn').addEventListener('click', refresh);
+  refresh();
+</script>
+</body>
+</html>
